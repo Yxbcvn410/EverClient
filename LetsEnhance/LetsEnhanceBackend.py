@@ -40,7 +40,7 @@ class LetsEnhanceBackend(AbstractWebsiteBackend):
         if 'progress_callback' in kwargs:
             progress = kwargs['progress_callback']
         else:
-            def progress(progress_value):
+            def progress(_progress_value):
                 pass
         echo('Uploading image...')
         path = kwargs['image_path']
@@ -133,11 +133,11 @@ class LetsEnhanceComplexSession(ComplexSession):
     def __init__(self):
         super().__init__(LetsEnhanceBackend())
 
-    def perform(self, images: str or list, target_dir: str, print_callback, progress_callback):
+    def perform(self, images: str or list, target_dir: str, print_callback, progress_callback, finalize_callback):
         if images is None:
             return
         if type(images) == str:
             images = [images]
         super()._perform(
             session_arg_list=[{'image_path': image_path, 'target_path': target_dir} for image_path in images],
-            print_callback=print_callback, progress_callback=progress_callback)
+            print_callback=print_callback, progress_callback=progress_callback, finalize_callback=finalize_callback)

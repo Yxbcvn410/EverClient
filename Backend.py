@@ -83,7 +83,8 @@ class ComplexSession:
         self.backend = backend
 
     def _perform(self, session_arg_list=None, print_callback=print,
-                progress_callback=lambda progress_value: None):
+                 progress_callback=lambda progress_value: None,
+                 finalize_callback=lambda: None):
         if session_arg_list is None:
             session_arg_list = []
         temp_mail = TempMail()
@@ -143,7 +144,7 @@ class ComplexSession:
                     session_arg_list.pop(0)
                     self.backend.delete_account()
 
-            except requests.exceptions.BaseHTTPError:
+            except requests.exceptions.ChunkedEncodingError or requests.exceptions.ConnectionError:
                 # Network error occured, retry session
                 print_callback('Network connection lost, retrying...')
                 counter -= 1
@@ -155,7 +156,7 @@ class ComplexSession:
                 print_callback('Deleting account...')
                 self.backend.delete_account()
                 print_callback('Done.')
-                progress_callback(0)
+                finalize_callback()
                 return
 
             # refresh progress
@@ -163,7 +164,7 @@ class ComplexSession:
         print_callback('All sessions complete, deleting account...')
         self.backend.delete_account()
         print_callback('Done.')
-        progress_callback(0)
+        finalize_callback()
 
     def perform(self, *args, **kw):
         pass
